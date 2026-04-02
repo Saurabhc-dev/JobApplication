@@ -8,32 +8,34 @@ import { FormContext } from "../context/FormContext";
 
 export default function FormPage() {
   const [step, setStep] = useState(1);
-   const [errors, setErrors] = useState({});
-    const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const { formData , setFormData } = useContext(FormContext);
-  
+  const { formData, setFormData } = useContext(FormContext);
 
-function validateStep() {
+  function validateStep() {
     let newErrors = {};
 
     if (step === 1) {
       if (!formData.name) newErrors.name = "Name is required";
       if (!formData.email.includes("@"))
         newErrors.email = "Valid email required";
-      if (formData.phone.length < 10)
-        newErrors.phone = "Phone must be 10 digits";
+     if (!/^[0-9]+$/.test(formData.phone)) {
+  newErrors.phone = "Only numbers are allowed";
+} else if (formData.phone.length !== 10) {
+  newErrors.phone = "Phone must be 10 digits";
+}
     }
 
     if (step === 2) {
       if (!formData.degree) newErrors.degree = "Degree required";
     }
 
-   if (step === 4) {
-  if (!formData.role) newErrors.role = "Role required";
-  if (!formData.country) newErrors.country = "Country required";
-  if (!formData.date) newErrors.date = "Date required";
-}
+    if (step === 4) {
+      if (!formData.role) newErrors.role = "Role required";
+      if (!formData.country) newErrors.country = "Country required";
+      if (!formData.date) newErrors.date = "Date required";
+    }
 
     setErrors(newErrors);
 
@@ -41,7 +43,7 @@ function validateStep() {
   }
 
   function nextStep() {
-     if (!validateStep()) return;
+    if (!validateStep()) return;
     setStep((prev) => prev + 1);
   }
 
@@ -61,7 +63,7 @@ function validateStep() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(formData),
-        }
+        },
       );
 
       if (!response.ok) throw new Error("Failed");
@@ -91,18 +93,18 @@ function validateStep() {
   }
 
   function renderStep() {
-     if (success) {
+    if (success) {
       return <h2>✅ Application Submitted Successfully!</h2>;
     }
     switch (step) {
       case 1:
-        return <Step1 errors={errors}/>;
+        return <Step1 errors={errors} />;
       case 2:
-        return <Step2 errors={errors}/>;
+        return <Step2 errors={errors} />;
       case 3:
         return <Step3 />;
       case 4:
-        return <Step4 errors={errors}/>;
+        return <Step4 errors={errors} />;
       case 5:
         return <Step5 />;
       default:
@@ -115,8 +117,12 @@ function validateStep() {
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Job Application</h1>
-          <p className="text-gray-500">Complete the form to apply for the position</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Job Application
+          </h1>
+          <p className="text-gray-500">
+            Complete the form to apply for the position
+          </p>
         </div>
 
         {/* Progress Indicator */}
@@ -158,9 +164,7 @@ function validateStep() {
 
         {/* Form Card */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-2 md:p-2">
-            {renderStep()}
-          </div>
+          <div className="p-2 md:p-2">{renderStep()}</div>
         </div>
 
         {/* Navigation Buttons */}
@@ -175,7 +179,7 @@ function validateStep() {
           ) : (
             <div></div>
           )}
-          
+
           {step < 5 && (
             <button
               onClick={nextStep}
@@ -184,14 +188,15 @@ function validateStep() {
               Continue →
             </button>
           )}
-          
+
           {step === 5 && (
             <button
-             onClick={handleSubmit} disabled={loading}
+              onClick={handleSubmit}
+              disabled={loading}
               className="ml-auto px-6 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
             >
               {loading ? "Submitting..." : "Submit"}
-                          </button>
+            </button>
           )}
         </div>
       </div>
